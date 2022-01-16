@@ -5,3 +5,9 @@ A toy compiler for the Oat language from University of Pennsylvania's course
 rewrite in Rust.
 
 The compiler uses a subset of LLVM IR, referred to as "LLVMLite".
+
+## Compilation phases
+
+![Compilation phases][phases]
+
+[phases]: ./images/phases.dot.jpg "Compilation phases"

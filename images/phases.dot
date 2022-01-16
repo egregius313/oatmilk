@@ -1,0 +1,26 @@
+digraph compiler_phases {
+    compound = true
+
+    source [label = "Source Code"]
+
+    subgraph cluster_optimizations {
+        label = "Optimizations"
+        CF [label="Constant Folding"]
+        DCE [label="Dead Code Elimintation"]
+
+        CF -> DCE
+    }
+
+    subgraph cluster_backends {
+        label = "Backend"
+
+        OptLLVMLite -> { x86 WebAssembly }
+    }
+
+    source -> AST [label="parse"]
+    AST -> LLVMLite [label="convert to IR"]
+
+    LLVMLite -> CF [lhead=cluster_optimizations]
+
+    DCE -> OptLLVMLite [ltail=cluster_optimizations, lhead=cluster_backends]
+}
