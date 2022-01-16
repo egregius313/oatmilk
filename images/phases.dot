@@ -4,7 +4,7 @@ digraph compiler_phases {
     source [label = "Source Code"]
 
     subgraph cluster_optimizations {
-        label = "Optimizations"
+        label = "Optimizations\ncrate: ir-passes"
         CF [label="Constant Folding"]
         DCE [label="Dead Code Elimintation"]
 
@@ -14,10 +14,16 @@ digraph compiler_phases {
     subgraph cluster_backends {
         label = "Backend"
 
-        OptLLVMLite -> { x86 WebAssembly }
+        OptLLVMLite [label="Optimized LLVMLite code"]
+
+        OptLLVMLite -> x86 [label="crate: llvmlite2x86"]
+        OptLLVMLite -> WebAssembly [label="crate: llvmlite2wasm"]
     }
 
-    source -> AST [label="parse"]
+    AST [label="Oat AST\ncrate: oat-ast"]
+    LLVMLite [label="LLVMLite\ncrate: llvmlite"]
+
+    source -> AST [label="parse\ncrate: oat-parse"]
     AST -> LLVMLite [label="convert to IR"]
 
     LLVMLite -> CF [lhead=cluster_optimizations]
