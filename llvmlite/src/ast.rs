@@ -144,6 +144,6 @@ pub struct GlobalDeclaration(Type, GlobalInitializer);
 pub struct Program {
     pub types: IndexMap<Tid, Type>,
     pub globals: IndexMap<Gid, GlobalDeclaration>,
-    pub functions: IndexMap<Gid, GlobalDeclaration>,
+    pub functions: IndexMap<Gid, FunctionDecl>,
     pub externals: IndexMap<Gid, Type>,
 }
