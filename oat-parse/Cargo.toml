@@ -1,0 +1,12 @@
+[package]
+name = "oat-parse"
+version = "0.1.0"
+authors = [ "Edward Minnix III <egregius313@gmail.com>" ]
+edition = "2021"
+
+[dependencies]
+nom = "7.1.0"
+
+[dependencies.oat-ast]
+path = "../oat-ast"
+version = "0.1.0"
