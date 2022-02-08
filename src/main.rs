@@ -1,5 +1,9 @@
 use clap::Parser;
 
+mod config;
+mod frontend;
+
+/// Whether or not the current platform is Linux
 const IS_LINUX: bool = cfg!(linux);
 
 #[derive(Parser, Debug)]
@@ -7,7 +11,7 @@ const IS_LINUX: bool = cfg!(linux);
 struct Args {
     /// Use Linux-style names for labels when generating x86/ARM
     #[clap(long)]
-    linux: bool,
+    linux: Option<bool>,
 
     /// Run the test suite
     #[clap(long)]
@@ -35,6 +39,8 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+
     println!("Hello, world!");
-    println!("Use linux: {}", args.linux);
+    println!("--linux passed: {}", matches!(args.linux, Some(_)));
+    println!("Use linux: {}", args.linux.unwrap_or(IS_LINUX));
 }
