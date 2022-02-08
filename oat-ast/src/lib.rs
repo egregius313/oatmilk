@@ -1,11 +1,15 @@
+use indexmap::IndexMap;
+
 pub type Id = String;
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum UnaryOp {
     Neg,
     Lognot,
     Bitnot,
 }
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum BinaryOp {
     Add,
     Sub,
@@ -25,6 +29,7 @@ pub enum BinaryOp {
     Sar,
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Type {
     Bool,
     Int,
@@ -32,18 +37,21 @@ pub enum Type {
     NullRef(ReferenceType),
 }
 
+#[derive(Debug, PartialEq)]
 pub enum ReferenceType {
     String,
     Struct(Id),
     Array(Box<Type>),
-    Function(Vec<Box<Type>>, Box<ReturnType>),
+    Function(Vec<Type>, Box<ReturnType>),
 }
 
+#[derive(Debug, PartialEq)]
 pub enum ReturnType {
     ReturnVoid,
     ReturnValue(Box<Type>),
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Expression {
     CNull(ReferenceType),
     CBool(bool),
@@ -69,6 +77,7 @@ pub enum Expression {
     Unary(UnaryOp, Box<Expression>),
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Statement {
     Assignment(Expression, Expression),
     Declaration(Id, Expression),
@@ -105,4 +114,44 @@ pub enum Statement {
         body: Vec<Statement>,
     },
     Return(Option<Expression>),
+}
+
+pub type Block = Vec<Statement>;
+
+#[derive(Debug, PartialEq)]
+pub struct GlobalDeclaration {
+    pub name: Id,
+    pub init: Expression,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FunctionDecl {
+    pub return_type: ReturnType,
+    pub name: Id,
+    pub args: Vec<(Type, Id)>,
+    pub body: Block,
+}
+
+// #[derive(Debug, PartialEq)]
+// pub struct Field {
+//     pub name: Id,
+//     pub field_type: Type,
+// }
+
+#[derive(Debug, PartialEq)]
+pub struct TypeDeclaration {
+    pub name: Id,
+    pub fields: IndexMap<Id, Type>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Declaration {
+    Variable(GlobalDeclaration),
+    Function(FunctionDecl),
+    Type(TypeDeclaration),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Program {
+    pub declarations: Vec<Declaration>,
 }

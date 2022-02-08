@@ -2,3 +2,7 @@
 name = "oat-ast"
 version = "0.1.0"
 authors = [ "Edward Minnix III <egregius313@gmail.com>" ]
+edition = "2021"
+
+[dependencies]
+indexmap = "1.8.0"
