@@ -13,7 +13,7 @@ pub type Uid = String;
 pub type Label = String;
 
 /// LLVM types
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
     Void,
     I1,
@@ -27,7 +27,7 @@ pub enum Type {
 }
 
 /// The type signature of a function
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FunctionType {
     pub arg_types: Vec<Type>,
     pub ret_type: Type,
