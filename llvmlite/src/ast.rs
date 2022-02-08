@@ -138,7 +138,7 @@ pub enum GlobalInitializer {
 
 /// Top-level definitions for values
 #[derive(Debug, PartialEq, Eq)]
-pub struct GlobalDeclaration(Type, GlobalInitializer);
+pub struct GlobalDeclaration(pub Type, pub GlobalInitializer);
 
 pub type TypeContext = IndexMap<Tid, Type>;
 
