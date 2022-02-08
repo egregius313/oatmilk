@@ -76,6 +76,7 @@ pub enum Condition {
     Slt,
     Sle,
     Sge,
+    Sgt,
 }
 
 /// Non-terminating instructions
