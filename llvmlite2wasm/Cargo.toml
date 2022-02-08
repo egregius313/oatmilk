@@ -1,0 +1,12 @@
+[package]
+name = "llvmlite2wasm"
+version = "0.1.0"
+authors = [ "Edward Minnix III <egregius313@gmail.com>" ]
+edition = "2021"
+
+[dependencies.llvmlite]
+path = "../llvmlite"
+version = "0.1.0"
+
+[dependencies.wasm-encoder]
+version = "0.3"
