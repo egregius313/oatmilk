@@ -1,0 +1,20 @@
+[package]
+name = "llvmlite2x86"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.x86]
+path = "../x86"
+version = "0.1.0"
+
+[dependencies.llvmlite]
+path = "../llvmlite"
+version = "0.1.0"
+
+[dependencies.indexmap]
+version = "^1.8"
+
+[dependencies.lazy_static]
+version = "1.4.0"
