@@ -140,10 +140,12 @@ pub enum GlobalInitializer {
 #[derive(Debug, PartialEq, Eq)]
 pub struct GlobalDeclaration(Type, GlobalInitializer);
 
+pub type TypeContext = IndexMap<Tid, Type>;
+
 /// An LLVMLite Program
 #[derive(Debug, PartialEq, Eq)]
 pub struct Program {
-    pub types: IndexMap<Tid, Type>,
+    pub types: TypeContext,
     pub globals: IndexMap<Gid, GlobalDeclaration>,
     pub functions: IndexMap<Gid, FunctionDecl>,
     pub externals: IndexMap<Gid, Type>,
