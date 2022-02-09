@@ -84,6 +84,12 @@ impl<T: Into<i64>> From<T> for Expression {
     }
 }
 
+// impl From<&str> for Expression {
+//     fn from(v: &str) -> Expression {
+//         Expression::Id(String::from(v))
+//     }
+// }
+
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     Assignment(Expression, Expression),
