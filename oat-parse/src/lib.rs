@@ -74,15 +74,50 @@ fn parse_statement(input: &str) -> IResult<&str, Statement> {
 #[cfg(test)]
 mod statement_tests {
     use super::*;
-    // #[test]
-    // fn assignment() {
-    //     let x = Expression::Id(String::from("x"));
+    #[test]
+    fn assignment() {
+        let x = Expression::Id(String::from("x"));
 
-    //     assert_eq!(
-    //         parse_statement("x = 0;"),
-    //         Ok(("", Statement::Assignment(x, (0).into())))
-    //     );
-    // }
+        assert_eq!(
+            parse_statement("x = 0;"),
+            Ok(("", Statement::Assignment(x, (0).into())))
+        );
+    }
+}
+
+#[cfg(test)]
+mod block_tests {
+    use super::*;
+
+    #[test]
+    fn simple_block() {
+        assert_eq!(parse_block(""), Ok(("", vec![])));
+    }
+
+    #[test]
+    fn single_statment() {
+        let x = Expression::Id(String::from("x"));
+        assert_eq!(
+            parse_block("x = 0;"),
+            Ok(("", vec![Statement::Assignment(x, (0).into())]))
+        )
+    }
+
+    #[test]
+    fn multi_statement() {
+        let x = Expression::Id(String::from("x"));
+
+        assert_eq!(
+            parse_block("x=0;\nx=1;"),
+            Ok((
+                "",
+                vec![
+                    Statement::Assignment(x.clone(), (0).into()),
+                    Statement::Assignment(x.clone(), (1).into())
+                ]
+            ))
+        )
+    }
 }
 
 fn parse_declaration(_input: &str) -> IResult<&str, Declaration> {
