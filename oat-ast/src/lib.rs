@@ -51,7 +51,7 @@ pub enum ReturnType {
     ReturnValue(Type),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     CNull(ReferenceType),
     CBool(bool),
