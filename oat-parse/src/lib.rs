@@ -3,23 +3,22 @@
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{char, multispace0, one_of},
     combinator::map,
-    multi::{many0, separated_list0},
-    sequence::{delimited, preceded, separated_pair, terminated, tuple},
+    multi::{many0},
+    sequence::{preceded, separated_pair, terminated},
     IResult,
 };
 
 use oat_ast::*;
 
 mod helper;
-use helper::{parse_int, ws};
+use helper::{ws};
 
 mod expression;
 use expression::*;
 
 mod types;
-use types::*;
+
 
 fn eq(input: &str) -> IResult<&str, &str> {
     ws(tag("="))(input)

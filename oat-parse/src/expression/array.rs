@@ -8,7 +8,7 @@ use nom::{
     IResult,
 };
 
-use oat_ast::{Expression, Type};
+use oat_ast::Expression;
 
 use super::parse_expression;
 use crate::types::parse_type;
@@ -52,7 +52,7 @@ pub fn parse_array(input: &str) -> IResult<&str, Expression> {
 #[cfg(test)]
 mod array_tests {
     use super::*;
-
+    use oat_ast::Type;
     #[test]
     fn carray() {
         assert_eq!(
