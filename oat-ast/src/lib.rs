@@ -77,6 +77,13 @@ pub enum Expression {
     Unary(UnaryOp, Box<Expression>),
 }
 
+impl<T: Into<i64>> From<T> for Expression {
+    fn from(v: T) -> Expression {
+        let i: i64 = v.into();
+        Expression::CInt(i)
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Statement {
     Assignment(Expression, Expression),
