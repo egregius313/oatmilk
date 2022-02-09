@@ -3,7 +3,7 @@ use nom::{
     bytes::complete::tag,
     character::complete::char,
     combinator::{map, map_res, value},
-    multi::{fold_many0, many0, separated_list0},
+    multi::{fold_many0, separated_list0},
     sequence::{delimited, preceded, separated_pair, terminated},
     IResult,
 };
