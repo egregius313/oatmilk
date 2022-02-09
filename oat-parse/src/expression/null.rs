@@ -6,7 +6,7 @@ use nom::{
     sequence::{terminated, tuple},
     IResult,
 };
-use oat_ast::{Expression, ReferenceType, Type};
+use oat_ast::Expression;
 
 pub fn parse_null(input: &str) -> IResult<&str, Expression> {
     let null = tag("NULL");
@@ -19,6 +19,7 @@ pub fn parse_null(input: &str) -> IResult<&str, Expression> {
 #[cfg(test)]
 mod null_tests {
     use super::*;
+    use oat_ast::{Expression, ReferenceType, Type};
     #[test]
     fn string() {
         assert_eq!(
