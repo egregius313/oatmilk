@@ -13,6 +13,9 @@ pub use operator::*;
 mod null;
 pub use null::*;
 
+mod array;
+pub use array::*;
+
 use crate::helper::parse_int;
 use crate::ws;
 

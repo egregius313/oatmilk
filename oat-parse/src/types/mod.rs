@@ -125,7 +125,7 @@ fn parse_type_suffix(input: &str) -> IResult<&str, TypeSuffix> {
     ))(input)
 }
 
-fn parse_type(input: &str) -> IResult<&str, Type> {
+pub fn parse_type(input: &str) -> IResult<&str, Type> {
     let (input, init) = alt((
         map(tag("bool"), |_: &str| Type::Bool),
         map(tag("int"), |_: &str| Type::Int),
