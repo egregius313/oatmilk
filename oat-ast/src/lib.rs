@@ -29,7 +29,7 @@ pub enum BinaryOp {
     Sar,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Type {
     Bool,
     Int,
@@ -37,7 +37,7 @@ pub enum Type {
     NullRef(ReferenceType),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ReferenceType {
     String,
     Struct(Id),
@@ -45,10 +45,10 @@ pub enum ReferenceType {
     Function(Vec<Type>, Box<ReturnType>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ReturnType {
     ReturnVoid,
-    ReturnValue(Box<Type>),
+    ReturnValue(Type),
 }
 
 #[derive(Debug, PartialEq)]
