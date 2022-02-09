@@ -2,7 +2,7 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::{char, multispace0, one_of},
-    combinator::{map_res, recognize},
+    combinator::{map_res, opt, recognize},
     error::ParseError,
     multi::{many0, many1},
     sequence::{delimited, preceded, terminated},
@@ -51,7 +51,12 @@ fn decimal(input: &str) -> IResult<&str, i64> {
 }
 
 pub fn parse_int(input: &str) -> IResult<&str, i64> {
-    alt((hexadecimal, octal, binary, decimal))(input)
+    let (input, maybe_negative) = opt(tag("-"))(input)?;
+    let (input, num) = alt((hexadecimal, octal, binary, decimal))(input)?;
+    Ok(match maybe_negative {
+        Some(_) => (input, -num),
+        _ => (input, num),
+    })
 }
 
 /// A combinator that takes a parser `inner` and produces a parser that also
@@ -64,4 +69,31 @@ where
     F: FnMut(&'a str) -> IResult<&'a str, O, E>,
 {
     delimited(multispace0, inner, multispace0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_decimal() {
+        assert_eq!(parse_int("120").unwrap(), ("", 120));
+        assert_eq!(parse_int("123450").unwrap(), ("", 123450));
+    }
+
+    #[test]
+    fn parse_decimal_negative() {
+        assert_eq!(parse_int("-10").unwrap(), ("", -10));
+    }
+
+    #[test]
+    fn parse_binary() {
+        assert_eq!(parse_int("0b100").unwrap(), ("", 4));
+        assert_eq!(parse_int("0b10011").unwrap(), ("", 19));
+    }
+
+    #[test]
+    fn parse_hex() {
+        assert_eq!(parse_int("-0x1f").unwrap(), ("", -0x1f));
+    }
 }

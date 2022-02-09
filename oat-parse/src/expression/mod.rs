@@ -1,36 +1,26 @@
-use nom::{
-    bytes::complete::tag,
-    combinator::{alt, map},
-    IResult,
-};
+use nom::{branch::alt, combinator::map, IResult};
+use oat_ast::Expression;
 
-use oat_ast::*;
+mod identifier;
+pub use identifier::*;
 
-fn parse_unop(input: &str) -> IResult<&str, UnaryOp> {
-    alt((
-        map(tag("-"), |_| UnaryOp::Neg),
-        map(tag("!"), |_| UnaryOp::Lognot),
-        map(tag("~"), |_| UnaryOp::Bitnot),
-    ))(input)
-}
+mod boolean;
+pub use boolean::*;
 
-fn parse_binop(input: &str) -> IResult<&str, BinaryOp> {
-    alt((
-        map(tag("+"), |_| BinaryOp::Add),
-        map(tag("-"), |_| BinaryOp::Sub),
-        map(tag("*"), |_| BinaryOp::Mul),
-        map(tag("=="), |_| BinaryOp::Eq),
-        map(tag("!="), |_| BinaryOp::Neq),
-        map(tag("<"), |_| BinaryOp::Lt),
-        map(tag("<="), |_| BinaryOp::Lte),
-        map(tag(">"), |_| BinaryOp::Gt),
-        map(tag(">="), |_| BinaryOp::Gte),
-        map(tag("&"), |_| BinaryOp::And),
-        map(tag("|"), |_| BinaryOp::Or),
-        map(tag("[&]", |_| BinaryOp::IAnd)),
-        map(tag("[|]"), |_| BinaryOp::IOr),
-        map(tag("<<"), |_| BinaryOp::Shl),
-        map(tag(">>"), |_| BinaryOp::Shr),
-        map(tag(">>>"), |_| BinaryOp::Sar),
-    ))(input)
+mod operator;
+pub use operator::*;
+
+mod null;
+pub use null::*;
+
+use crate::helper::parse_int;
+use crate::ws;
+
+pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
+    ws(alt((
+        parse_bool,
+        parse_null,
+        map(parse_int, Expression::CInt),
+        map(parse_identifier, Expression::Id),
+    )))(input)
 }
