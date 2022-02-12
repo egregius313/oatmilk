@@ -1,4 +1,9 @@
+use std::error::Error;
+use std::fs;
+
 use clap::Parser;
+
+use oat_parse::parse_program;
 
 mod config;
 mod frontend;
@@ -37,10 +42,18 @@ struct Args {
     files: Vec<String>,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
-    println!("Hello, world!");
-    println!("--linux passed: {}", matches!(args.linux, Some(_)));
-    println!("Use linux: {}", args.linux.unwrap_or(IS_LINUX));
+    // println!("Hello, world!");
+    // println!("--linux passed: {}", matches!(args.linux, Some(_)));
+    // println!("Use linux: {}", args.linux.unwrap_or(IS_LINUX));
+    //
+    //
+    // String
+    let input = fs::read_to_string(&args.files[0])?;
+    // let input = content.as_str();
+    let program = parse_program(&input)?;
+
+    Ok(())
 }

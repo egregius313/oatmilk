@@ -7,6 +7,17 @@ use wasm_encoder::{CodeSection, Function, Instruction, Module, ValType};
 mod errors;
 pub use errors::{Error, Result};
 
+struct CompilationContext {
+    types: llvm::TypeContext,
+}
+
+impl From<llvm::Program> for CompilationContext {
+    fn from(program: llvm::Program) -> Self {
+        let llvm::Program { types, .. } = program;
+        Self { types }
+    }
+}
+
 #[derive(Clone)]
 enum Type {
     Void,
@@ -89,28 +100,38 @@ impl WasmTypable for llvm::FunctionDecl {
 /// Compilation target
 ///
 /// `Target` represents what type to compile to.
-trait Compile<Target> {
-    fn compile(&self) -> Result<Target>;
+trait Compile<'a, Target, Context = &'a CompilationContext> {
+    fn compile(&self, context: Context) -> Result<Target>;
 }
 
-impl Compile<Function> for llvm::FunctionDecl {
-    fn compile(&self) -> Result<Function> {
+impl<'c, 'a> Compile<'c, Vec<Instruction<'a>>> for llvm::ControlFlowGraph {
+    fn compile(&self, _context: &'c CompilationContext) -> Result<Vec<Instruction<'a>>> {
+        todo!("Compile cfg")
+    }
+}
+
+impl<'a> Compile<'a, Function> for llvm::FunctionDecl {
+    fn compile(&self, context: &'a CompilationContext) -> Result<Function> {
         let locals = vec![];
         let mut function = Function::new(locals);
 
+        let instructions: Vec<Instruction> = self.cfg.compile(context)?;
+        for instruction in instructions {
+            function.instruction(instruction);
+        }
         Ok(function)
     }
 }
 
-impl Compile<Module> for llvm::Program {
-    fn compile(&self) -> Result<Module> {
+impl<'a> Compile<'a, Module> for llvm::Program {
+    fn compile(&self, context: &CompilationContext) -> Result<Module> {
         let mut module = Module::new();
 
         let mut code_section = CodeSection::new();
 
         for function in &self.functions {
             let (_name, body) = function;
-            let fn_code = body.compile()?;
+            let fn_code = body.compile(context)?;
             code_section.function(&fn_code);
         }
         module.section(&code_section);

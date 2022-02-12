@@ -118,32 +118,33 @@ fn compile_get_element_pointer(
     op: &llvmlite::Operand,
     path: &Vec<llvmlite::Operand>,
 ) -> Result<Vec<x86::Instruction>> {
-    use llvmlite::Type::*;
-    let mut ty = match &*type_ {
-        Ptr(t) => Array(0, t.clone()),
-        _ => return Err(Error::DerefNonPointer),
-    };
-    let mut instructions = vec![instruction!(Addq,)];
-    for offset in path {
-        match ty {
-            Struct(ref types) => match offset {
-                llvmlite::Operand::Const(n) => {
-                    let offset: usize = types
-                        .iter()
-                        .take(*n as usize)
-                        .map(|t| sizeof::sizeof(&context.types, t))
-                        .sum();
-                    ty = types[*n as usize];
-                }
-            },
-            Array(_, ref el_type) => {}
-            Namedt(name) => {}
-            _ => {
-                panic!("Get element pointer of non-reference type")
-            }
-        }
-    }
-    Ok(instructions)
+    // use llvmlite::Type::*;
+    // let mut ty = match &*type_ {
+    //     Ptr(t) => Array(0, t.clone()),
+    //     _ => return Err(Error::DerefNonPointer),
+    // };
+    // let mut instructions = vec![instruction!(Addq,)];
+    // for offset in path {
+    //     match ty {
+    //         Struct(ref types) => match offset {
+    //             llvmlite::Operand::Const(n) => {
+    //                 let offset: usize = types
+    //                     .iter()
+    //                     .take(*n as usize)
+    //                     .map(|t| sizeof::sizeof(&context.types, t))
+    //                     .sum();
+    //                 ty = types[*n as usize];
+    //             }
+    //         },
+    //         Array(_, ref el_type) => {}
+    //         Namedt(name) => {}
+    //         _ => {
+    //             panic!("Get element pointer of non-reference type")
+    //         }
+    //     }
+    // }
+    // Ok(instructions)
+    todo!("Get element pointer")
 }
 
 fn compile_function_declaration(

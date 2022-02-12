@@ -4,21 +4,21 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     combinator::map,
-    multi::{many0},
+    error::Error,
+    multi::many0,
     sequence::{preceded, separated_pair, terminated},
-    IResult,
+    Err, IResult,
 };
 
 use oat_ast::*;
 
 mod helper;
-use helper::{ws};
+use helper::ws;
 
 mod expression;
 use expression::*;
 
 mod types;
-
 
 fn eq(input: &str) -> IResult<&str, &str> {
     ws(tag("="))(input)
@@ -119,11 +119,59 @@ mod block_tests {
     }
 }
 
+// #[derive(Debug, PartialEq)]
+// pub struct FunctionDecl {
+//     pub return_type: ReturnType,
+//     pub name: Id,
+//     pub args: Vec<(Type, Id)>,
+//     pub body: Block,
+// }
+
+fn parse_function_declaration(input: &str) -> IResult<&str, FunctionDecl> {}
+
 fn parse_declaration(_input: &str) -> IResult<&str, Declaration> {
     todo!("Declarations")
 }
 
-pub fn parse_program(input: &str) -> IResult<&str, Program> {
+fn parse_program_internal(input: &str) -> IResult<&str, Program> {
     let (input, declarations) = many0(ws(parse_declaration))(input)?;
     Ok((input, Program { declarations }))
+}
+
+#[derive(Debug)]
+pub struct OatParseError;
+
+impl std::fmt::Display for OatParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Oat parser error")
+    }
+}
+
+impl std::error::Error for OatParseError {
+    //  fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    //         None
+    //     }
+
+    //     fn backtrace(&self) -> Option<&std::backtrace::Backtrace> {
+    //         None
+    //     }
+    fn description(&self) -> &str {
+        "The Oat Parser failed"
+    }
+    //     fn cause(&self) -> Option<&dyn std::error::Error> {
+    //         None
+    //     }
+}
+
+// TODO: Replace with proper error type
+pub fn parse_program(input: &str) -> Result<Program, OatParseError> {
+    parse_program_internal(input)
+        .and_then(|(_, p)| Ok(p))
+        .or_else(|_| Err(OatParseError))
+
+    // if let Ok((input, program)) = parse_program_internal(input) {
+    //     Ok(program)
+    // } else {
+    //     Err(())
+    // }
 }
