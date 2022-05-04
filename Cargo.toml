@@ -39,3 +39,7 @@ version = "0.1.0"
 [dependencies.oat-error]
 path = "oat-error"
 version = "0.1.0"
+
+[dependencies.oat-typecheck]
+path = "oat-typecheck"
+version = "0.1.0"

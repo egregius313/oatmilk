@@ -188,6 +188,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "oat-typecheck"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "oat-ast",
+ "oat-error",
+ "oat-typecontext",
+]
+
+[[package]]
 name = "oat-typecontext"
 version = "0.1.0"
 dependencies = [
@@ -208,6 +218,7 @@ dependencies = [
  "oat-error",
  "oat-parse",
  "oat-symbol",
+ "oat-typecheck",
  "oat-typecontext",
 ]
 

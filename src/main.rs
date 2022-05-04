@@ -4,6 +4,8 @@ use std::fs;
 use clap::Parser;
 
 use oat_parse::parse_program;
+use oat_symbol::create_session_if_not_set_then;
+use oat_typecheck::type_check;
 
 mod config;
 mod frontend;
@@ -42,8 +44,20 @@ struct Args {
     files: Vec<String>,
 }
 
+fn compile(input: &str) -> Result<(), Box<dyn Error>> {
+    create_session_if_not_set_then(|_| {
+        let program = dbg!(parse_program(&input)?);
+        type_check(&program)?;
+        Ok(())
+    })
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
+
+    let use_linux_naming = IS_LINUX || matches!(args.linux, Some(true));
+
+    println!("Linux naming?: {}", use_linux_naming);
 
     // println!("Hello, world!");
     // println!("--linux passed: {}", matches!(args.linux, Some(_)));
@@ -53,7 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // String
     let input = fs::read_to_string(&args.files[0])?;
     // let input = content.as_str();
-    let program = parse_program(&input)?;
+    compile(&input)?;
 
     Ok(())
 }
