@@ -1,4 +1,11 @@
-use nom::{branch::alt, combinator::map, IResult};
+use nom::multi::{fold_many0, separated_list0};
+use nom::{
+    branch::alt,
+    character::complete::char,
+    combinator::map,
+    sequence::{delimited, tuple},
+    IResult,
+};
 use oat_ast::Expression;
 
 mod identifier;
@@ -25,15 +32,70 @@ pub use length::*;
 use crate::helper::parse_int;
 use crate::ws;
 
-pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
+#[derive(PartialEq, Clone, Debug)]
+enum Suffix {
+    Call(Vec<oat_ast::Expression>),
+    Index(oat_ast::Expression),
+    Projection(oat_ast::Id),
+}
+
+fn parse_suffix(input: &str) -> IResult<&str, Suffix> {
     ws(alt((
+        map(
+            delimited(
+                char('('),
+                separated_list0(char(','), parse_expression),
+                char(')'),
+            ),
+            Suffix::Call,
+        ),
+        map(
+            delimited(char('['), parse_expression, char(']')),
+            Suffix::Index,
+        ),
+    )))(input)
+}
+
+#[test]
+fn test_suffix() {
+    oat_symbol::create_session_if_not_set_then(|_| {
+        assert_eq!(
+            parse_suffix("(1)"),
+            Ok(("", Suffix::Call(vec![Expression::CInt(1i64)])))
+        );
+
+        assert_eq!(
+            parse_suffix("(1, x)"),
+            Ok(("", Suffix::Call(vec![Expression::CInt(1i64), "x".into()])))
+        );
+
+        assert_eq!(parse_suffix("[x]"), Ok(("", Suffix::Index("x".into()))))
+    })
+}
+
+pub fn parse_expression(input: &str) -> IResult<&str, Expression> {
+    let (input, base) = ws(alt((
         parse_bool,
         parse_null,
         map(parse_int, Expression::CInt),
         parse_length,
         // parse_call,
         map(parse_identifier, Expression::Id),
-    )))(input)
+        delimited(char('('), ws(parse_expression), char(')')),
+    )))(input)?;
+
+    fold_many0(
+        parse_suffix,
+        move || base.clone(),
+        |e, suffix| match suffix {
+            Suffix::Call(args) => Expression::Call(Box::new(e), args),
+            Suffix::Index(index) => Expression::Index {
+                value: Box::new(e),
+                index: Box::new(index),
+            },
+            Suffix::Projection(field) => Expression::Proj(Box::new(e), field),
+        },
+    )(input)
 }
 
 #[cfg(test)]
