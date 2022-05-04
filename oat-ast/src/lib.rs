@@ -97,8 +97,8 @@ pub enum Statement {
     SCall(Expression, Vec<Expression>),
     If {
         condition: Expression,
-        then: Vec<Statement>,
-        else_: Vec<Statement>,
+        then: Block,
+        else_: Block,
     },
     /// Statement for casting nullable expressions into the non-null values
     ///
@@ -109,22 +109,16 @@ pub enum Statement {
     ///     /* str was null */
     ///     write("nothing");
     /// }
-    Cast(
-        ReferenceType,
-        Id,
-        Expression,
-        Vec<Statement>,
-        Vec<Statement>,
-    ),
+    Cast(ReferenceType, Id, Expression, Block, Block),
     For {
         init: Vec<(Id, Expression)>,
         condition: Option<Expression>,
         update: Option<Box<Statement>>,
-        body: Vec<Statement>,
+        body: Block,
     },
     While {
         condition: Expression,
-        body: Vec<Statement>,
+        body: Block,
     },
     Return(Option<Expression>),
 }
