@@ -2,9 +2,10 @@
 //! LLVM.
 
 use indexmap::IndexMap;
+use oat_symbol::Symbol;
 
 /// Type identifiers
-pub type Tid = String;
+pub type Tid = Symbol;
 /// Global identifiers
 pub type Gid = String;
 /// Local identifiers
@@ -34,7 +35,7 @@ pub struct FunctionType {
 }
 
 /// Syntactic Values
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Operand {
     Null,
     Const(i64),

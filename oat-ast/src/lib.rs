@@ -1,6 +1,7 @@
 use indexmap::IndexMap;
+use oat_symbol::Symbol;
 
-pub type Id = String;
+pub type Id = Symbol;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum UnaryOp {

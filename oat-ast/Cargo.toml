@@ -6,3 +6,7 @@ edition = "2021"
 
 [dependencies]
 indexmap = "1.8.0"
+
+[dependencies.oat-symbol]
+path = "../oat-symbol"
+version = "0.1.0"

@@ -25,14 +25,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "oat-ast"
-version = "0.1.0"
-dependencies = [
- "indexmap",
- "oat-symbol",
-]
-
-[[package]]
 name = "oat-symbol"
 version = "0.1.0"
 dependencies = [
