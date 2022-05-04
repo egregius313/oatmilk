@@ -1,0 +1,12 @@
+[package]
+name = "oat-typecheck"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+indexmap = "^1.8.0"
+oat-ast = { path = "../oat-ast", version = "0.1.0" }
+oat-typecontext = { path = "../oat-typecontext", version = "0.1.0" }
+oat-error = { path = "../oat-error", version = "0.1.0" }

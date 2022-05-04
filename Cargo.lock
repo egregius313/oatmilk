@@ -109,6 +109,7 @@ name = "llvmlite"
 version = "0.1.0"
 dependencies = [
  "indexmap",
+ "oat-symbol",
 ]
 
 [[package]]
@@ -157,14 +158,42 @@ name = "oat-ast"
 version = "0.1.0"
 dependencies = [
  "indexmap",
+ "oat-symbol",
+]
+
+[[package]]
+name = "oat-error"
+version = "0.1.0"
+dependencies = [
+ "oat-ast",
+ "thiserror",
 ]
 
 [[package]]
 name = "oat-parse"
 version = "0.1.0"
 dependencies = [
+ "indexmap",
  "nom",
  "oat-ast",
+ "oat-symbol",
+]
+
+[[package]]
+name = "oat-symbol"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "scoped-tls",
+]
+
+[[package]]
+name = "oat-typecontext"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "oat-ast",
+ "oat-error",
 ]
 
 [[package]]
@@ -176,7 +205,10 @@ dependencies = [
  "llvmlite",
  "llvmlite2wasm",
  "llvmlite2x86",
+ "oat-error",
  "oat-parse",
+ "oat-symbol",
+ "oat-typecontext",
 ]
 
 [[package]]
@@ -231,6 +263,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "scoped-tls"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
+
+[[package]]
 name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -261,6 +299,26 @@ name = "textwrap"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0066c8d12af8b5acd21e00547c3797fde4e8677254a7ee429176ccebbe93dd80"
+
+[[package]]
+name = "thiserror"
+version = "1.0.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd829fe32373d27f76265620b5309d0340cb8550f523c1dda251d6298069069a"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0396bc89e626244658bef819e22d0cc459e795a5ebe878e6ec336d1674a8d79a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "unicode-xid"

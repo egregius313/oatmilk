@@ -27,3 +27,15 @@ version = "0.1.0"
 [dependencies.llvmlite2x86]
 path = "llvmlite2x86"
 version = "0.1.0"
+
+[dependencies.oat-symbol]
+path = "oat-symbol"
+version = "0.1.0"
+
+[dependencies.oat-typecontext]
+path = "oat-typecontext"
+version = "0.1.0"
+
+[dependencies.oat-error]
+path = "oat-error"
+version = "0.1.0"
