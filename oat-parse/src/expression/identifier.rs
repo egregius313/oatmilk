@@ -11,6 +11,7 @@ use nom::{
 };
 
 use oat_ast::Id;
+use oat_symbol::Symbol;
 
 /// Use Rust style identifiers
 pub fn parse_identifier(input: &str) -> IResult<&str, Id> {
@@ -19,19 +20,23 @@ pub fn parse_identifier(input: &str) -> IResult<&str, Id> {
             alt((alpha1, tag("_"))),
             many0(alt((alphanumeric1, tag("_")))),
         )),
-        |id: &str| String::from(id),
+        Symbol::intern,
     )(input)
 }
 
 #[cfg(test)]
 mod tests {
+    use oat_symbol::create_session_if_not_set_then;
+
     use super::*;
 
     #[test]
     fn all_alpha() {
-        assert_eq!(
-            parse_identifier("variable").unwrap(),
-            ("", String::from("variable"))
-        );
+        create_session_if_not_set_then(|_| {
+            assert_eq!(
+                parse_identifier("variable").unwrap(),
+                ("", Id::from("variable"))
+            );
+        })
     }
 }
