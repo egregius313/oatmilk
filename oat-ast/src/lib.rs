@@ -2,14 +2,14 @@ use indexmap::IndexMap;
 
 pub type Id = String;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum UnaryOp {
     Neg,
     Lognot,
     Bitnot,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum BinaryOp {
     Add,
     Sub,
@@ -29,7 +29,7 @@ pub enum BinaryOp {
     Sar,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
     Bool,
     Int,
@@ -37,7 +37,7 @@ pub enum Type {
     NullRef(ReferenceType),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ReferenceType {
     String,
     Struct(Id),
@@ -45,13 +45,13 @@ pub enum ReferenceType {
     Function(Vec<Type>, Box<ReturnType>),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ReturnType {
     ReturnVoid,
     ReturnValue(Type),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Expression {
     CNull(ReferenceType),
     CBool(bool),
@@ -90,7 +90,7 @@ impl<T: Into<i64>> From<T> for Expression {
 //     }
 // }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Statement {
     Assignment(Expression, Expression),
     Declaration(Id, Expression),
@@ -125,13 +125,13 @@ pub enum Statement {
 
 pub type Block = Vec<Statement>;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct GlobalDeclaration {
     pub name: Id,
     pub init: Expression,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct FunctionDecl {
     pub return_type: ReturnType,
     pub name: Id,
@@ -145,20 +145,20 @@ pub struct FunctionDecl {
 //     pub field_type: Type,
 // }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub struct TypeDeclaration {
     pub name: Id,
     pub fields: IndexMap<Id, Type>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub enum Declaration {
     Variable(GlobalDeclaration),
     Function(FunctionDecl),
     Type(TypeDeclaration),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Program {
     pub declarations: Vec<Declaration>,
 }
