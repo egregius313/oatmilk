@@ -151,8 +151,8 @@ pub fn parse_type(input: &str) -> IResult<&str, Type> {
         parse_type_suffix,
         move || init.clone(),
         |t, suffix| match (t.clone(), suffix) {
-            (Type::Ref(rt), TypeSuffix::Null) => Type::NullRef(rt),
-            (_, TypeSuffix::Array) => Type::Ref(ReferenceType::Array(Box::new(t))),
+            (Type::Ref(rt), TypeSuffix::Null) => oat_ast::Type::NullRef(rt),
+            (_, TypeSuffix::Array) => oat_ast::Type::Ref(ReferenceType::Array(Box::new(t))),
             (_, _) => t.clone(),
         },
     )(input)
@@ -161,6 +161,8 @@ pub fn parse_type(input: &str) -> IResult<&str, Type> {
 #[cfg(test)]
 mod type_tests {
     use super::*;
+    use oat_ast::Id;
+    use oat_symbol::create_session_if_not_set_then;
     #[test]
     fn string_arr() {
         assert_eq!(
@@ -216,13 +218,12 @@ mod type_tests {
     }
     #[test]
     fn my_class() {
-        assert_eq!(
-            parse_type("MyClass"),
-            Ok((
-                "",
-                Type::Ref(ReferenceType::Struct(String::from("MyClass")))
-            ))
-        );
+        create_session_if_not_set_then(|_| {
+            assert_eq!(
+                parse_type("MyClass"),
+                Ok(("", Type::Ref(ReferenceType::Struct(Id::from("MyClass")))))
+            );
+        })
     }
 }
 
@@ -235,6 +236,9 @@ pub fn parse_return_type(input: &str) -> IResult<&str, ReturnType> {
 
 #[cfg(test)]
 mod return_type_tests {
+    use oat_ast::Id;
+    use oat_symbol::create_session_if_not_set_then;
+
     use super::*;
     #[test]
     fn ret_void() {
@@ -251,18 +255,23 @@ mod return_type_tests {
 
     #[test]
     fn ret_null_ref() {
-        let my_class = ReferenceType::Struct(String::from("MyClass"));
-        assert_eq!(
-            parse_return_type("MyClass?"),
-            Ok(("", ReturnType::ReturnValue(Type::NullRef(my_class))))
-        );
+        create_session_if_not_set_then(|_| {
+            let my_class = ReferenceType::Struct(Id::from("MyClass"));
+            assert_eq!(
+                parse_return_type("MyClass?"),
+                Ok(("", ReturnType::ReturnValue(Type::NullRef(my_class))))
+            );
+        })
     }
+
     #[test]
     fn ret_struct_ref() {
-        let my_class = ReferenceType::Struct(String::from("MyClass"));
-        assert_eq!(
-            parse_return_type("MyClass"),
-            Ok(("", ReturnType::ReturnValue(Type::Ref(my_class))))
-        );
+        create_session_if_not_set_then(|_| {
+            let my_class = ReferenceType::Struct(Id::from("MyClass"));
+            assert_eq!(
+                parse_return_type("MyClass"),
+                Ok(("", ReturnType::ReturnValue(Type::Ref(my_class))))
+            );
+        })
     }
 }
