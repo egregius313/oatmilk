@@ -103,13 +103,22 @@ pub enum Statement {
     /// Statement for casting nullable expressions into the non-null values
     ///
     /// ## Example:
+    /// ```
     /// if? (string s = str) {
     ///     write(s);
     /// } else {
     ///     /* str was null */
     ///     write("nothing");
     /// }
+    /// ```
     Cast(ReferenceType, Id, Expression, Block, Block),
+    /// Represents
+    ///
+    /// ```c
+    /// for (init; condition; update) {
+    ///     body;
+    /// }
+    /// ```
     For {
         init: Vec<(Id, Expression)>,
         condition: Option<Expression>,
