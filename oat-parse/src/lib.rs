@@ -115,16 +115,41 @@ fn parse_statement(input: &str) -> IResult<&str, Statement> {
 #[cfg(test)]
 mod statement_tests {
     use super::*;
+    use oat_ast::{Expression, Statement};
     use oat_symbol::create_session_if_not_set_then;
+
+    macro_rules! assert_parses {
+        ($src: expr, $body: expr) => {
+            create_session_if_not_set_then(|_| {
+                let cb = || $body;
+                assert_eq!(parse_statement($src), Ok(("", cb())))
+            })
+        };
+    }
+
     #[test]
     fn assignment() {
-        create_session_if_not_set_then(|_| {
+        assert_parses!("x = 0;", {
             let x: Expression = "x".into();
+            Statement::Assignment(x, (0i64).into())
+        })
+    }
 
-            assert_eq!(
-                parse_statement("x = 0;"),
-                Ok(("", Statement::Assignment(x, (0i64).into())))
-            );
+    #[test]
+    fn if_() {
+        assert_parses!("if (x == 0) { y = 1; } else { y = 2; }", {
+            let x: Expression = "x".into();
+            let y: Expression = "y".into();
+
+            Statement::If {
+                condition: Expression::Binary {
+                    op: oat_ast::BinaryOp::Eq,
+                    left: Box::new(x),
+                    right: Box::new(0i64.into()),
+                },
+                then: vec![Statement::Assignment(y.clone(), 1i64.into())],
+                else_: vec![Statement::Assignment(y.clone(), 2i64.into())],
+            }
         })
     }
 }
