@@ -10,6 +10,16 @@ pub enum UnaryOp {
     Bitnot,
 }
 
+impl UnaryOp {
+    pub fn op_type(&self) -> (Type, Type) {
+        use UnaryOp::*;
+        match self {
+            Neg | Bitnot => (Type::Int, Type::Int),
+            Lognot => (Type::Bool, Type::Bool),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum BinaryOp {
     Add,
@@ -30,12 +40,35 @@ pub enum BinaryOp {
     Sar,
 }
 
+impl BinaryOp {
+    /// The type associated with a binary operation. Returns `Some((left,
+    /// right), output)` if there is a specific type for the operation, or
+    /// `None` if there is no single type (e.g. equality is polymorphic).
+    pub fn op_type(&self) -> Option<((Type, Type), Type)> {
+        use BinaryOp::*;
+        match self {
+            Add | Mul | Sub | Shl | Shr | Sar | IAnd | IOr => {
+                Some(((Type::Int, Type::Int), Type::Int))
+            }
+            Lt | Lte | Gt | Gte => Some(((Type::Int, Type::Int), Type::Bool)),
+            And | Or => Some(((Type::Bool, Type::Bool), Type::Bool)),
+            Eq | Neq => None,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
     Bool,
     Int,
     Ref(ReferenceType),
     NullRef(ReferenceType),
+}
+
+impl Type {
+    pub fn is_nullable(self) -> bool {
+        matches!(self, Type::NullRef(_))
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -78,18 +111,31 @@ pub enum Expression {
     Unary(UnaryOp, Box<Expression>),
 }
 
-impl<T: Into<i64>> From<T> for Expression {
-    fn from(v: T) -> Expression {
-        let i: i64 = v.into();
-        Expression::CInt(i)
+macro_rules! impl_expression_from_i64 {
+    ($t: ty) => {
+        impl From<$t> for Expression {
+            fn from(v: $t) -> Expression {
+                let i: i64 = v.into();
+                Expression::CInt(i)
+            }
+        }
+    };
+}
+
+impl_expression_from_i64!(i32);
+impl_expression_from_i64!(i64);
+
+impl From<&str> for Expression {
+    fn from(id: &str) -> Expression {
+        Expression::Id(Symbol::intern(id))
     }
 }
 
-// impl From<&str> for Expression {
-//     fn from(v: &str) -> Expression {
-//         Expression::Id(String::from(v))
-//     }
-// }
+impl From<String> for Expression {
+    fn from(id: String) -> Expression {
+        Expression::Id(Symbol::intern(id.as_str()))
+    }
+}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Statement {
