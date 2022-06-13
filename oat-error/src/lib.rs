@@ -7,4 +7,7 @@ pub use types::TypeError;
 pub enum Error {
     #[error("Type error: {0}")]
     TypeError(#[from] TypeError),
+
+    #[error("Parser Error")]
+    ParseError,
 }
