@@ -1,4 +1,6 @@
 //! A representation of a subset of x86
+#[macro_use]
+extern crate derive_more;
 
 mod operands;
 pub use crate::operands::{ByteOperand, JumpOperand, Operand, ToOperand};
@@ -15,16 +17,10 @@ pub type Label = String;
 pub type Quad = i64;
 
 /// Immediates
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Display)]
 pub enum Immediate {
     Literal(Quad),
     Label(Label),
-}
-
-impl From<Immediate> for Data {
-    fn from(im: Immediate) -> Data {
-        Data::Quad(im)
-    }
 }
 
 impl Immediate {
@@ -36,16 +32,6 @@ impl Immediate {
 impl ToOperand for Immediate {
     fn to_operand(self) -> Operand {
         Operand::Immediate(self)
-    }
-}
-
-impl std::fmt::Display for Immediate {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use Immediate::*;
-        match self {
-            Literal(x) => write!(f, "{}", x),
-            Label(lbl) => write!(f, "{}", lbl),
-        }
     }
 }
 
@@ -71,28 +57,20 @@ impl Indirect<Label> for Register {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Display)]
 pub enum Condition {
+    #[display(fmt = "e")]
     Eq,
+    #[display(fmt = "ne")]
     Neq,
+    #[display(fmt = "g")]
     Gt,
+    #[display(fmt = "ge")]
     Ge,
+    #[display(fmt = "l")]
     Lt,
+    #[display(fmt = "le")]
     Le,
-}
-
-impl std::fmt::Display for Condition {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use Condition::*;
-        match self {
-            Eq => write!(f, "e"),
-            Neq => write!(f, "ne"),
-            Gt => write!(f, "g"),
-            Ge => write!(f, "ge"),
-            Lt => write!(f, "l"),
-            Le => write!(f, "le"),
-        }
-    }
 }
 
 #[derive(Clone, Copy)]
@@ -186,19 +164,12 @@ impl std::fmt::Display for Instruction {
     }
 }
 
+#[derive(From, PartialEq, Display)]
 pub enum Data {
+    #[display(fmt = "\t.asciz\t\"{}\"", "_0.escape_default()")]
     Asciz(String),
+    #[display(fmt = "\t.quad\t{}", _0)]
     Quad(Immediate),
-}
-
-impl std::fmt::Display for Data {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use Data::*;
-        match self {
-            Asciz(s) => write!(f, "\t.asciz\t\"{}\"", s.escape_default()),
-            Quad(i) => write!(f, "\t.quad\t{}", i),
-        }
-    }
 }
 
 pub enum AsmContent {
@@ -264,6 +235,7 @@ impl std::fmt::Display for AsmBlock {
     }
 }
 
+#[derive(From)]
 pub struct Program {
     pub blocks: Vec<AsmBlock>,
 }
