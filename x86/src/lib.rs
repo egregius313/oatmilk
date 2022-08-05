@@ -218,7 +218,6 @@ impl std::fmt::Display for AsmBlock {
                 for instruction in instructions {
                     write!(f, "{}\n", instruction)?;
                 }
-                Ok(())
             }
             Data(data) => {
                 write!(f, "\t.data\n")?;
@@ -229,9 +228,9 @@ impl std::fmt::Display for AsmBlock {
                 for datum in data {
                     write!(f, "{}\n", datum)?;
                 }
-                Ok(())
             }
         }
+        Ok(())
     }
 }
 
