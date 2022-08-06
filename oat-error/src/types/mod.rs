@@ -26,4 +26,39 @@ pub enum TypeError {
 
     #[error("Incompatible types")]
     IncompatibleType,
+
+    #[error("Undefined varibale {0}")]
+    UndefinedVariable(String),
+
+    #[error("Array length must be integer, not {0:?}")]
+    ArrayLength(Type),
+
+    #[error("{array:?} array elements cannot be {elt:?}")]
+    IncompatibleArrayElement { array: Type, elt: Type },
+
+    #[error("Can only call functions")]
+    CanOnlyCallFunctions,
+
+    #[error("Cannot use void as an expression")]
+    VoidExpression,
+
+    #[error("Cannot assign to a function")]
+    CannotAssignFunction,
+
+    #[error("Return value expected, none provided")]
+    ReturnValueMissing,
+
+    #[error("Void functions cannot return values")]
+    ReturnValueProvidedInVoidFunction,
+
+    #[error("Function call expected {expected} args, found {given}")]
+    IncompatibleFunctionArgCounts { expected: usize, given: usize },
+
+    #[error("Dead code after return")]
+    DeadCodeAfterReturn,
+
+    #[error("Function does not return, but return value of type {expected_ret_type} is required")]
+    DidNotReturn {
+        expected_ret_type: oat_ast::ReturnType,
+    },
 }

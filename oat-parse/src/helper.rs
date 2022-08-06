@@ -19,7 +19,7 @@ fn hexadecimal(input: &str) -> IResult<&str, i64> {
                 many0(char('_')),
             ))),
         ),
-        |out: &str| i64::from_str_radix(&str::replace(&out, "_", ""), 16),
+        |out: &str| i64::from_str_radix(&str::replace(out, "_", ""), 16),
     )(input)
 }
 
@@ -29,7 +29,7 @@ fn octal(input: &str) -> IResult<&str, i64> {
             alt((tag("0o"), tag("0O"))),
             recognize(many1(terminated(one_of("01234567"), many0(char('_'))))),
         ),
-        |out: &str| i64::from_str_radix(&str::replace(&out, "_", ""), 8),
+        |out: &str| i64::from_str_radix(&str::replace(out, "_", ""), 8),
     )(input)
 }
 
@@ -39,14 +39,14 @@ fn binary(input: &str) -> IResult<&str, i64> {
             alt((tag("0b"), tag("0B"))),
             recognize(many1(terminated(one_of("01"), many0(char('_'))))),
         ),
-        |out: &str| i64::from_str_radix(&str::replace(&out, "_", ""), 2),
+        |out: &str| i64::from_str_radix(&str::replace(out, "_", ""), 2),
     )(input)
 }
 
 fn decimal(input: &str) -> IResult<&str, i64> {
     map_res(
         recognize(many1(terminated(one_of("0123456789"), many0(char('_'))))),
-        |out: &str| i64::from_str_radix(&str::replace(&out, "_", ""), 10),
+        |out: &str| out.parse::<i64>(),
     )(input)
 }
 

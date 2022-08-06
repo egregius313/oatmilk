@@ -3,19 +3,24 @@ use indexmap::IndexMap;
 use llvmlite as ll;
 use oat_ast as oat;
 
-pub type Context = IndexMap<oat::Id, (ll::Type, ll::Operand)>;
+mod type_context;
+pub use type_context::*;
 
-pub struct TypingContext(pub IndexMap<oat::Id, IndexMap<oat::Id, oat::Type>>);
+#[derive(Default, Clone)]
+pub(crate) struct Context {
+    operands: IndexMap<oat::Id, (ll::Type, ll::Operand)>,
+}
 
-impl TypingContext {
-    fn get_type(&self, name: &oat::Id) -> Option<IndexMap<oat::Id, oat::Type>> {
-        self.0.get(name)
+impl Context {
+    pub(crate) fn new() -> Self {
+        Context {
+            operands: Default::default(),
+        }
     }
 
-    /// Return the index and type of a field
-    fn get_field(&self, type_name: &oat::Id, field_name: &oat::Id) -> Option<(usize, oat::Type)> {
-        let struct_ = self.0.get(type_name)?;
-        let (i, _, type_) = struct_.get_full(field_name)?;
-        Some((i, type_))
+    pub(crate) fn extend_operand(&self, id: oat::Id, type_: ll::Type, op: ll::Operand) -> Self {
+        let mut copy = self.clone();
+        copy.operands.insert(id, (type_, op));
+        copy
     }
 }

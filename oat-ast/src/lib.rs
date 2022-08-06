@@ -1,7 +1,12 @@
+#[macro_use]
+extern crate derive_more;
+
 use indexmap::IndexMap;
 use oat_symbol::Symbol;
 
 pub type Id = Symbol;
+
+pub mod macros;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum UnaryOp {
@@ -11,7 +16,7 @@ pub enum UnaryOp {
 }
 
 impl UnaryOp {
-    pub fn op_type(&self) -> (Type, Type) {
+    pub const fn op_type(&self) -> (Type, Type) {
         use UnaryOp::*;
         match self {
             Neg | Bitnot => (Type::Int, Type::Int),
@@ -44,7 +49,7 @@ impl BinaryOp {
     /// The type associated with a binary operation. Returns `Some((left,
     /// right), output)` if there is a specific type for the operation, or
     /// `None` if there is no single type (e.g. equality is polymorphic).
-    pub fn op_type(&self) -> Option<((Type, Type), Type)> {
+    pub const fn op_type(&self) -> Option<((Type, Type), Type)> {
         use BinaryOp::*;
         match self {
             Add | Mul | Sub | Shl | Shr | Sar | IAnd | IOr => {
@@ -57,16 +62,18 @@ impl BinaryOp {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Display)]
 pub enum Type {
+    #[display(fmt = "bool")]
     Bool,
+    #[display(fmt = "int")]
     Int,
     Ref(ReferenceType),
     NullRef(ReferenceType),
 }
 
 impl Type {
-    pub fn is_nullable(self) -> bool {
+    pub const fn is_nullable(&self) -> bool {
         matches!(self, Type::NullRef(_))
     }
 }
@@ -79,18 +86,38 @@ pub enum ReferenceType {
     Function(Vec<Type>, Box<ReturnType>),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+impl std::fmt::Display for ReferenceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ReferenceType::String => write!(f, "string"),
+            ReferenceType::Struct(id) => write!(f, "{}", id.name()),
+            ReferenceType::Array(t) => write!(f, "{}[]", t),
+            ReferenceType::Function(arg_types, return_type) => {
+                write!(f, "(")?;
+                arg_types
+                    .into_iter()
+                    .try_for_each(|t| write!(f, "{}, ", t))?;
+                write!(f, ") -> {}", return_type)
+            }
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Display)]
 pub enum ReturnType {
+    #[display(fmt = "void")]
     ReturnVoid,
     ReturnValue(Type),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, From)]
 pub enum Expression {
     CNull(ReferenceType),
     CBool(bool),
+    #[from(types(i32, u32))]
     CInt(i64),
     CStr(String),
+    #[from]
     Id(Id),
     CArr(Type, Vec<Expression>),
     NewArr(Type, Box<Expression>),
@@ -111,19 +138,38 @@ pub enum Expression {
     Unary(UnaryOp, Box<Expression>),
 }
 
-macro_rules! impl_expression_from_i64 {
-    ($t: ty) => {
-        impl From<$t> for Expression {
-            fn from(v: $t) -> Expression {
-                let i: i64 = v.into();
-                Expression::CInt(i)
-            }
+impl std::ops::Add for Expression {
+    type Output = Expression;
+
+    fn add(self, rhs: Expression) -> Expression {
+        Expression::Binary {
+            op: BinaryOp::Add,
+            left: Box::new(self),
+            right: Box::new(rhs),
         }
-    };
+    }
 }
 
-impl_expression_from_i64!(i32);
-impl_expression_from_i64!(i64);
+impl std::ops::Add<i64> for Expression {
+    type Output = Expression;
+
+    fn add(self, rhs: i64) -> Expression {
+        self + Expression::CInt(rhs)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn from_i64() {
+        assert_eq!(super::Expression::CInt(23_i64), 23_i64.into())
+    }
+
+    #[test]
+    fn from_i32() {
+        assert_eq!(super::Expression::CInt(23_i64), 23_i32.into())
+    }
+}
 
 impl From<&str> for Expression {
     fn from(id: &str) -> Expression {
@@ -131,6 +177,7 @@ impl From<&str> for Expression {
     }
 }
 
+#[cfg(test)]
 impl From<String> for Expression {
     fn from(id: String) -> Expression {
         Expression::Id(Symbol::intern(id.as_str()))
@@ -150,7 +197,7 @@ pub enum Statement {
     /// Statement for casting nullable expressions into the non-null values
     ///
     /// ## Example:
-    /// ```
+    /// ```oat
     /// if? (string s = str) {
     ///     write(s);
     /// } else {

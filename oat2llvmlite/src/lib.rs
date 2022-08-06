@@ -1,5 +1,7 @@
 mod compile;
-mod constant_fold;
+pub use compile::*;
+
+// mod constant_fold;
 mod context;
 
 #[cfg(test)]

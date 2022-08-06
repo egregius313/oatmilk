@@ -5,6 +5,7 @@ authors = [ "Edward Minnix III <egregius313@gmail.com>" ]
 edition = "2021"
 
 [dependencies]
+derive_more = "0.99.17"
 indexmap = "1.8.0"
 
 [dependencies.oat-symbol]

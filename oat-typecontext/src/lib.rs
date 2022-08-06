@@ -7,12 +7,12 @@ use indexmap::IndexMap;
 use oat_ast as oat;
 use oat_ast::{ReferenceType, ReturnType, Type};
 
-use oat_error::{Error as OatError, TypeError};
+use oat_error::TypeError;
 
 pub type FieldSet = IndexMap<oat::Id, oat::Type>;
 
 /// The typing context
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct TypingContext(IndexMap<oat::Id, FieldSet>);
 
 impl TypingContext {
@@ -48,7 +48,7 @@ impl TypingContext {
         tc
     }
 
-    pub fn is_subtype(&self, sub: &Type, super_: &Type) -> Result<bool, OatError> {
+    pub fn is_subtype(&self, sub: &Type, super_: &Type) -> Result<bool, TypeError> {
         use Type::*;
         if sub == super_ {
             return Ok(true);
@@ -65,7 +65,7 @@ impl TypingContext {
         &self,
         sub: &ReferenceType,
         super_: &ReferenceType,
-    ) -> Result<bool, OatError> {
+    ) -> Result<bool, TypeError> {
         use oat_ast::ReferenceType::*;
         Ok(match (sub, super_) {
             (String, String) => true,
@@ -104,7 +104,7 @@ impl TypingContext {
         })
     }
 
-    fn is_return_subtype(&self, sub: &ReturnType, super_: &ReturnType) -> Result<bool, OatError> {
+    fn is_return_subtype(&self, sub: &ReturnType, super_: &ReturnType) -> Result<bool, TypeError> {
         use oat_ast::ReturnType::*;
         Ok(match (sub, super_) {
             (ReturnVoid, ReturnVoid) => true,

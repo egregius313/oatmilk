@@ -7,6 +7,7 @@ edition = "2021"
 [dependencies]
 nom = "7.1.0"
 indexmap = "1.8.0"
+derive_more = "0.99.17"
 
 [dependencies.oat-ast]
 path = "../oat-ast"
@@ -14,4 +15,8 @@ version = "0.1.0"
 
 [dependencies.oat-symbol]
 path = "../oat-symbol"
+version = "0.1.0"
+
+[dependencies.oat-error]
+path = "../oat-error"
 version = "0.1.0"

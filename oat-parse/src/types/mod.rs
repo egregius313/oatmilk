@@ -153,7 +153,7 @@ pub fn parse_type(input: &str) -> IResult<&str, Type> {
         |t, suffix| match (t.clone(), suffix) {
             (Type::Ref(rt), TypeSuffix::Null) => oat_ast::Type::NullRef(rt),
             (_, TypeSuffix::Array) => oat_ast::Type::Ref(ReferenceType::Array(Box::new(t))),
-            (_, _) => t.clone(),
+            (_, _) => t,
         },
     )(input)
 }
@@ -230,7 +230,7 @@ mod type_tests {
 pub fn parse_return_type(input: &str) -> IResult<&str, ReturnType> {
     alt((
         map(tag("void"), |_| ReturnType::ReturnVoid),
-        map(parse_type, |t| ReturnType::ReturnValue(t)),
+        map(parse_type, ReturnType::ReturnValue),
     ))(input)
 }
 

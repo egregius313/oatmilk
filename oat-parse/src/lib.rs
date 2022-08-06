@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+mod lexer;
+
+#[macro_use]
+extern crate derive_more;
+extern crate oat_ast;
+
 use indexmap::IndexMap;
 
 use nom::{
@@ -7,21 +13,28 @@ use nom::{
     bytes::complete::tag,
     character::complete::{char, multispace0},
     combinator::{map, map_opt, opt, value},
-    multi::{many0, separated_list0},
+    multi::{many0, separated_list0, separated_list1},
     sequence::{delimited, preceded, separated_pair, terminated, tuple},
     IResult,
 };
 
 use oat_ast::*;
+use oat_error::ParseError;
 
 mod helper;
 use helper::ws;
 
 mod expression;
 use expression::*;
+
+mod keywords;
+use keywords::{else_, if_, return_, var, while_};
+
 use types::{parse_return_type, parse_type};
 
 mod types;
+
+mod tokens;
 
 fn eq(input: &str) -> IResult<&str, &str> {
     ws(tag("="))(input)
@@ -51,8 +64,35 @@ fn parse_block(input: &str) -> IResult<&str, Vec<Statement>> {
     delimited(ws(char('{')), many0(ws(parse_statement)), ws(char('}')))(input)
 }
 
+fn parse_for_loop_init(input: &str) -> IResult<&str, Vec<(Id, Expression)>> {
+    map(
+        opt(preceded(
+            var,
+            separated_list1(
+                tag(","),
+                separated_pair(parse_identifier, eq, parse_expression),
+            ),
+        )),
+        Option::unwrap_or_default,
+    )(input)
+}
+
+fn parse_for_loop_update(input: &str) -> IResult<&str, Option<Box<Statement>>> {
+    opt(alt((
+        map(
+            separated_pair(parse_expression, eq, parse_expression),
+            |(target, value)| Statement::Assignment(target, value),
+        ),
+        map_opt(parse_expression, |e| match e {
+            Expression::Call(fun, args) => Some(Statement::SCall(*fun, args)),
+            _ => None,
+        }),
+    )))(input)
+    .map(|(input, stmt)| (input, stmt.map(Box::new)))
+}
+
 fn parse_statement(input: &str) -> IResult<&str, Statement> {
-    let return_ = || ws(tag("return"));
+    // let return_ = || ws(tag("return"));
     #[inline]
     fn simple_stmt<'a, T>(
         c: impl FnMut(&'a str) -> IResult<&'a str, T>,
@@ -66,20 +106,17 @@ fn parse_statement(input: &str) -> IResult<&str, Statement> {
         ),
         map(
             terminated(
-                preceded(
-                    ws(tag("var")),
-                    separated_pair(parse_identifier, eq, parse_expression),
-                ),
+                preceded(var, separated_pair(parse_identifier, eq, parse_expression)),
                 semi,
             ),
             |(id, init)| Statement::Declaration(id, init),
         ),
         map(
             tuple((
-                tag("if"),
+                if_,
                 ws(parenthesized(parse_expression)),
                 parse_block,
-                map(opt(preceded(ws(tag("else")), parse_block)), |else_| {
+                map(opt(preceded(else_, parse_block)), |else_| {
                     else_.unwrap_or_default()
                 }),
             )),
@@ -93,10 +130,17 @@ fn parse_statement(input: &str) -> IResult<&str, Statement> {
             Expression::Call(fun, args) => Some(Statement::SCall(*fun, args)),
             _ => None,
         }),
-        map(simple_stmt(preceded(return_(), parse_expression)), |e| {
+        map(simple_stmt(preceded(return_, parse_expression)), |e| {
             Statement::Return(Some(e))
         }),
-        value(Statement::Return(None), simple_stmt(return_())),
+        map(
+            preceded(
+                while_,
+                tuple((ws(parenthesized(parse_expression)), ws(parse_block))),
+            ),
+            |(condition, body)| Statement::While { condition, body },
+        ),
+        value(Statement::Return(None), simple_stmt(return_)),
     ))(input)
     // if let Ok((input, (target, value))) =
     // {
@@ -149,6 +193,27 @@ mod statement_tests {
                 },
                 then: vec![Statement::Assignment(y.clone(), 1i64.into())],
                 else_: vec![Statement::Assignment(y.clone(), 2i64.into())],
+            }
+        })
+    }
+
+    #[test]
+    fn for_() {
+        assert_parses!("for (var x = 0; x < 10; x = x + 1) { f(x); }", {
+            let x: Expression = "x".into();
+            let f: Expression = "f".into();
+            Statement::For {
+                init: vec![("x".into(), 0_i64.into())],
+                condition: Some(Expression::Binary {
+                    op: BinaryOp::Lt,
+                    left: Box::new(x.clone()),
+                    right: Box::new(10_i64.into()),
+                }),
+                update: Some(Box::new(Statement::Assignment(
+                    x.clone(),
+                    x.clone() + 0_i64,
+                ))),
+                body: vec![Statement::SCall(f, vec![x.clone()])],
             }
         })
     }
@@ -300,6 +365,21 @@ mod declaration_tests {
         })
     }
 
+    // #[test]
+    // fn should_fail_local_scoping() {
+    //     test_declaration(
+    //         "int hello() { int x = 2; if (x == 2) { return 673; } return 43110; }",
+    //         || {
+    //             Declaration::Function(FunctionDecl {
+    //                 return_type: ReturnType::ReturnValue(Type::Int),
+    //                 name: "hello".into(),
+    //                 args: vec![],
+    //                 body: vec![Statement::Declaration(Type::Int, "x".into())]
+    //             })
+    //         }
+    //     )
+    // }
+
     #[test]
     fn point() {
         test_declaration("struct point { int x; int y; }", || {
@@ -329,26 +409,17 @@ fn parse_program_internal(input: &str) -> IResult<&str, Program> {
     Ok((input, Program { declarations }))
 }
 
-#[derive(Debug)]
-pub struct OatParseError;
-
-impl std::fmt::Display for OatParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Oat parser error")
-    }
-}
-
-impl std::error::Error for OatParseError {
-    fn description(&self) -> &str {
-        "The Oat Parser failed"
-    }
-}
-
 // TODO: Replace with proper error type
-pub fn parse_program(input: &str) -> Result<Program, OatParseError> {
+pub fn parse_program(input: &str) -> Result<Program, ParseError> {
     parse_program_internal(input)
-        .and_then(|(_, p)| Ok(p))
-        .or_else(|_| Err(OatParseError))
+        .map_err(|e| {
+            dbg!(e);
+            ParseError::NomParserError
+        })
+        .and_then(|(input, p)| match input {
+            "" => Ok(p),
+            rest => Err(ParseError::RemainingInput(String::from(rest))),
+        })
 
     // if let Ok((input, program)) = parse_program_internal(input) {
     //     Ok(program)

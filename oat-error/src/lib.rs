@@ -1,5 +1,8 @@
 use thiserror::Error;
 
+mod parser;
+pub use parser::ParseError;
+
 mod types;
 pub use types::TypeError;
 
@@ -8,6 +11,6 @@ pub enum Error {
     #[error("Type error: {0}")]
     TypeError(#[from] TypeError),
 
-    #[error("Parser Error")]
-    ParseError,
+    #[error("Parser Error: {0}")]
+    ParserError(#[from] ParseError),
 }
