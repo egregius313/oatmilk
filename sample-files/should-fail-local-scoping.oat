@@ -1,0 +1,5 @@
+int hello() {
+    var x = 2;
+    if (x == 2) { return 673; }
+    return 43110;
+}

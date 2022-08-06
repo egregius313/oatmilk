@@ -1,0 +1,10 @@
+struct point { int x; int y; }
+
+struct square { point upper_left; int side_length; }
+
+struct circle { point center; int radius; }
+
+int get_radius(circle c) {
+    var rad = c.radius;
+    return rad;
+}
