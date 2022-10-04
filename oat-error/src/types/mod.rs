@@ -1,7 +1,7 @@
 use oat_ast::{Id, Type};
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(PartialEq, Debug, Error)]
 pub enum TypeError {
     #[error("Struct not found: {0:?}")]
     StructNotFound(Id),
